@@ -1,7 +1,7 @@
 {
   "_instrucciones": "Archivo de datos oficiales del liquidador. Editelo cada mes cuando el DANE certifique un nuevo IPC y cada diciembre cuando se decrete el SMLMV. Los 12 numeros de cada anio son enero..diciembre. Use null para meses aun no certificados. Use punto decimal, nunca coma. No borre las comas entre numeros.",
-  "actualizado": "2026-05",
-  "actualizado_texto": "Serie DANE hasta mayo de 2026",
+  "actualizado": "2026-06",
+  "actualizado_texto": "Serie DANE hasta junio de 2026",
   "fuente_ipc": "DANE - IPC serie de empalme, base diciembre 2018 = 100",
   "fuente_smlmv": "Decreto anual de salario minimo",
   "ipc": {
@@ -28,7 +28,7 @@
     "2023": [128.27, 130.4, 131.77, 132.8, 133.38, 133.78, 134.45, 135.39, 136.11, 136.45, 137.09, 137.72],
     "2024": [138.98, 140.49, 141.48, 142.32, 142.92, 143.38, 143.67, 143.67, 144.02, 143.83, 144.22, 144.88],
     "2025": [146.24, 147.9, 148.68, 149.66, 150.14, 150.3, 150.71, 150.99, 151.48, 151.76, 151.87, 152.27],
-    "2026": [154.07, 155.73, 156.94, 158.17, 158.91, null, null, null, null, null, null, null]
+    "2026": [154.07, 155.73, 156.94, 158.17, 158.91, 159.53, null, null, null, null, null, null]
   },
   "smlmv": {
     "1984": 11298,

@@ -188,17 +188,34 @@ button.add:hover{background:var(--accent);color:var(--paper)}
 .acta-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 30px;font-size:13px;margin-bottom:20px}
 .acta-sec{font-family:'Source Serif 4',serif;font-size:20px;font-weight:700;margin:24px 0 6px;text-transform:uppercase;letter-spacing:.04em}
 .acta-sheet p, .acta-sheet li{font-size:13px;line-height:1.65}
+.acta-vigencia{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:1px solid rgba(0,0,0,.18);border-bottom:1px solid rgba(0,0,0,.18);padding:7px 0;margin-bottom:18px;text-align:center}
 .acta-fund{font-size:11.5px;color:var(--muted);margin-top:26px;border-top:1px solid rgba(0,0,0,.3);padding-top:12px;line-height:1.7}
 .firma{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:60px}
 .firma div{border-top:1px solid var(--ink);padding-top:6px;font-size:12px;text-align:center}
+@page{size:letter;margin:2.5cm 2.2cm 2.2cm 2.2cm}
 @media print{
-  body{background:#fff !important}
+  body{background:#fff !important;font-size:10.5pt}
   .tabs,header,footer,button.calc,.no-print{display:none !important}
   .wrap{padding:0;max-width:100%}
   .panel{display:none !important}
   #panel-acta{display:block !important}
   #panel-acta .acta-sheet{border:none;box-shadow:none;padding:0;max-width:100%}
-  table.liq th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  /* Fondos oscuros: sin esto el bloque del total sale casi en blanco */
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+
+  /* Nada se parte a mitad */
+  table.liq tr{break-inside:avoid}
+  table.liq thead{display:table-header-group}
+  table.liq tr.total{break-before:avoid}
+  .final,.acta-meta,.acta-vigencia,.notice{break-inside:avoid}
+  .acta-sec{break-after:avoid;break-inside:avoid}
+  .acta-head{break-after:avoid}
+  .acta-fund{break-inside:avoid}
+  p,li{orphans:3;widows:3}
+
+  /* Cifras alineadas en columna */
+  table.liq td.num,table.liq th.num,.final-value{font-variant-numeric:tabular-nums}
 }
 </style>
 </head>
@@ -1038,6 +1055,20 @@ function renderTablas(){
 }
 
 /* ---------- VII · ACTA ---------- */
+/* Envuelve la 1.a fila de cada tabla en <thead> para que el encabezado
+   se repita en cada pagina impresa. Se ejecuta justo antes de imprimir. */
+function envolverEncabezados(){
+  document.querySelectorAll('table.liq').forEach(t=>{
+    if(t.tHead)return;
+    const f=t.rows[0];
+    if(!f||!f.querySelector('th'))return;
+    const th=document.createElement('thead');
+    th.appendChild(f);
+    t.insertBefore(th,t.firstChild);
+  });
+}
+window.addEventListener('beforeprint',envolverEncabezados);
+
 function renderActa(){
   const sheet=$('acta-sheet');
   const fh=parseFecha(val('c-fecha-hecho')),fl=parseFecha(val('c-fecha-liq'));
@@ -1051,7 +1082,8 @@ function renderActa(){
     <div><b>Radicado:</b> ${val('c-radicado')||'—'}</div><div><b>Fecha de liquidación:</b> ${fmtFecha(fl)}</div>
     <div><b>Demandante(s):</b> ${val('c-demandante')||'—'}</div><div><b>Demandado(a):</b> ${val('c-demandado')||'—'}</div>
     <div><b>Fecha del hecho dañoso:</b> ${fmtFecha(fh)}</div><div><b>Elaborada por:</b> ${val('c-autor')||'—'}</div>
-  </div>`;
+  </div>
+  <div class="acta-vigencia">${DATOS_META.actualizado_texto} · último índice aplicado: ${ultimoIPCCertificado()||'—'} · ${DATOS_META.fuente_ipc||'IPC DANE serie de empalme'}</div>`;
   let granTotal=0;let sec=0;
   if(de){
     sec++;granTotal+=de.total;

@@ -481,10 +481,12 @@ button.add:hover{background:var(--accent);color:var(--paper)}
 
   <!-- VII · ACTA -->
   <section class="panel" id="panel-acta">
-    <div class="no-print" style="display:flex;gap:12px;margin-bottom:22px;justify-content:center">
-      <button class="calc" style="width:auto;padding:14px 34px;margin:0" onclick="renderActa();window.print()">Imprimir / Guardar PDF</button>
+    <div class="no-print" style="display:flex;gap:12px;margin-bottom:22px;justify-content:center;flex-wrap:wrap">
+      <button class="calc" style="width:auto;padding:14px 34px;margin:0" onclick="descargarPDF()">Guardar PDF</button>
+      <button class="calc" style="width:auto;padding:14px 34px;margin:0" onclick="descargarDocx()">Descargar Word (.docx)</button>
       <button class="secondary" onclick="renderActa()">Actualizar acta</button>
     </div>
+    <div id="acta-export-msg"></div>
     <div class="acta-sheet" id="acta-sheet">
       <div class="result-empty">Liquide los módulos II a V y pulse «Actualizar acta» para consolidar la liquidación.</div>
     </div>
@@ -497,6 +499,9 @@ button.add:hover{background:var(--accent);color:var(--paper)}
   </footer>
 </div>
 
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 const IPC_BASE={"2003":[50.42,50.98,51.51,52.1,52.36,52.33,52.26,52.42,52.53,52.56,52.75,53.07],"2004":[53.54,54.18,54.71,54.96,55.17,55.51,55.49,55.51,55.67,55.66,55.82,55.99],"2005":[56.45,57.02,57.46,57.72,57.95,58.18,58.21,58.21,58.46,58.6,58.66,58.7],"2006":[59.02,59.41,59.83,60.09,60.29,60.48,60.73,60.96,61.14,61.05,61.19,61.33],"2007":[61.8,62.53,63.29,63.85,64.05,64.12,64.23,64.14,64.2,64.2,64.51,64.82],"2008":[65.51,66.5,67.04,67.51,68.14,68.73,69.06,69.19,69.06,69.3,69.49,69.8],"2009":[70.21,70.8,71.15,71.38,71.39,71.35,71.32,71.35,71.28,71.19,71.14,71.2],"2010":[71.69,72.28,72.46,72.79,72.87,72.95,72.92,73.0,72.9,72.84,72.98,73.45],"2011":[74.12,74.57,74.77,74.86,75.07,75.31,75.42,75.39,75.62,75.77,75.87,76.19],"2012":[76.75,77.22,77.31,77.42,77.66,77.72,77.7,77.73,77.96,78.08,77.98,78.05],"2013":[78.28,78.63,78.79,78.99,79.21,79.39,79.43,79.5,79.73,79.52,79.35,79.56],"2014":[79.95,80.45,80.77,81.14,81.53,81.61,81.73,81.9,82.01,82.14,82.25,82.47],"2015":[83.0,83.96,84.45,84.9,85.12,85.21,85.37,85.78,86.39,86.98,87.51,88.05],"2016":[89.19,90.33,91.18,91.63,92.1,92.54,93.02,92.73,92.68,92.62,92.73,93.11],"2017":[94.07,95.01,95.46,95.91,96.12,96.23,96.18,96.32,96.36,96.37,96.55,96.92],"2018":[97.53,98.22,98.45,98.91,99.16,99.31,99.18,99.3,99.47,99.59,99.7,100.0],"2019":[100.6,101.18,101.62,102.12,102.44,102.71,102.94,103.03,103.26,103.43,103.54,103.8],"2020":[104.24,104.94,105.53,105.7,105.36,104.97,104.97,104.96,105.29,105.23,105.08,105.48],"2021":[105.91,106.58,107.12,107.76,108.84,108.78,109.14,109.62,110.04,110.06,110.6,111.41],"2022":[113.26,115.11,116.26,117.71,118.7,119.31,120.27,121.5,122.63,123.51,124.46,126.03],"2023":[128.27,130.4,131.77,132.8,133.38,133.78,134.45,135.39,136.11,136.45,137.09,137.72],"2024":[138.98,140.49,141.48,142.32,142.92,143.38,143.67,143.67,144.02,143.83,144.22,144.88],"2025":[146.24,147.9,148.68,149.66,150.14,150.3,150.71,150.99,151.48,151.76,151.87,152.27],"2026":[154.07,155.73,156.94,158.17,158.91,null,null,null,null,null,null,null]};
 const RV08={M:{"15":64.8,"16":63.9,"17":62.9,"18":61.9,"19":60.9,"20":60.0,"21":59.0,"22":58.0,"23":57.1,"24":56.1,"25":55.1,"26":54.2,"27":53.2,"28":52.3,"29":51.3,"30":50.3,"31":49.4,"32":48.4,"33":47.5,"34":46.5,"35":45.6,"36":44.6,"37":43.7,"38":42.7,"39":41.8,"40":40.8,"41":39.9,"42":39.0,"43":38.0,"44":37.1,"45":36.2,"46":35.3,"47":34.4,"48":33.4,"49":32.5,"50":31.6,"51":30.7,"52":29.9,"53":29.0,"54":28.1,"55":27.2,"56":26.4,"57":25.5,"58":24.6,"59":23.8,"60":23.0,"61":22.1,"62":21.3,"63":20.5,"64":19.7,"65":19.0,"66":18.2,"67":17.4,"68":16.7,"69":16.0,"70":15.3,"71":14.6,"72":14.0,"73":13.3,"74":12.7,"75":12.1,"76":11.5,"77":10.9,"78":10.4,"79":9.8,"80":9.3,"81":8.8,"82":8.3,"83":7.8,"84":7.4,"85":7.0,"86":6.6,"87":6.2,"88":5.8,"89":5.4,"90":5.1,"91":4.8,"92":4.5,"93":4.2,"94":3.9,"95":3.6,"96":3.3,"97":3.1,"98":2.9,"99":2.6,"100":2.4,"101":2.2,"102":2.1,"103":1.9,"104":1.7,"105":1.6,"106":1.4,"107":1.3,"108":1.1,"109":0.9,"110":0.5},F:{"15":70.0,"16":69.1,"17":68.1,"18":67.1,"19":66.1,"20":65.1,"21":64.2,"22":63.2,"23":62.2,"24":61.2,"25":60.2,"26":59.3,"27":58.3,"28":57.3,"29":56.3,"30":55.4,"31":54.4,"32":53.4,"33":52.4,"34":51.5,"35":50.5,"36":49.5,"37":48.6,"38":47.6,"39":46.6,"40":45.7,"41":44.7,"42":43.7,"43":42.8,"44":41.8,"45":40.9,"46":39.9,"47":39.0,"48":38.0,"49":37.1,"50":36.2,"51":35.2,"52":34.3,"53":33.4,"54":32.5,"55":31.6,"56":30.6,"57":29.7,"58":28.8,"59":27.9,"60":27.0,"61":26.2,"62":25.3,"63":24.4,"64":23.5,"65":22.7,"66":21.8,"67":21.0,"68":20.2,"69":19.4,"70":18.6,"71":17.8,"72":17.0,"73":16.2,"74":15.5,"75":14.7,"76":14.0,"77":13.3,"78":12.6,"79":11.9,"80":11.3,"81":10.6,"82":10.0,"83":9.4,"84":8.9,"85":8.3,"86":7.8,"87":7.3,"88":6.8,"89":6.3,"90":5.8,"91":5.4,"92":5.0,"93":4.6,"94":4.2,"95":3.9,"96":3.5,"97":3.2,"98":3.0,"99":2.7,"100":2.5,"101":2.3,"102":2.1,"103":1.9,"104":1.7,"105":1.6,"106":1.4,"107":1.3,"108":1.1,"109":0.9,"110":0.5}};
@@ -1165,6 +1170,181 @@ function renderActa(){
   <div class="acta-fund"><b>Fundamentos:</b> Indexación con IPC — serie de empalme DANE (base dic. 2018 = 100), regla del mes vencido. Vida probable — Resolución 1555 de 2010, Superintendencia Financiera (tabla RV08, e°(x)). Lucro cesante — fórmulas financieras con i = 0,004867 mensual (6 % anual), criterio del Consejo de Estado, Sección Tercera. Acrecimiento — sentencia de unificación Exp. 19146 (Rad. 15001-23-31-000-2000-03838-01). Perjuicios inmateriales — sentencias de unificación del 28 de agosto de 2014, Sección Tercera (Exps. 26251, 31170, 32988, 28804): daño moral, daño a la salud y afectación relevante a bienes convencional y constitucionalmente amparados. Herramienta académica: los valores deben verificarse contra el expediente y la prueba obrante.</div>
   <div class="firma"><div>Liquidador</div><div>Revisó</div></div>`;
   sheet.innerHTML=h;
+}
+
+/* ---------- exportación: PDF y Word ---------- */
+function actaVacia(){return !window._DE&&!window._MU&&!window._LE&&!window._IN;}
+
+function nombreArchivo(ext){
+  const rad=(val('c-radicado')||'acta').trim().replace(/[^a-zA-Z0-9-]+/g,'_')||'acta';
+  return `acta-liquidacion_${rad}.${ext}`;
+}
+
+function descargarBlob(blob,nombre){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=nombre;document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},150);
+}
+
+async function descargarPDF(){
+  renderActa();
+  if(actaVacia()){alert('Liquide al menos un módulo (II a V) y pulse «Actualizar acta» antes de descargar.');return;}
+  const sheet=$('acta-sheet'),msg=$('acta-export-msg');
+  if(msg)msg.innerHTML='<div class="notice">Generando PDF…</div>';
+  try{
+    const canvas=await html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+    const imgData=canvas.toDataURL('image/png');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','pt','a4');
+    const pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight();
+    const imgW=pageW,imgH=canvas.height*imgW/canvas.width;
+    let restante=imgH,pos=0;
+    pdf.addImage(imgData,'PNG',0,pos,imgW,imgH);
+    restante-=pageH;
+    while(restante>0){
+      pos=restante-imgH;
+      pdf.addPage();
+      pdf.addImage(imgData,'PNG',0,pos,imgW,imgH);
+      restante-=pageH;
+    }
+    pdf.save(nombreArchivo('pdf'));
+    if(msg)msg.innerHTML='';
+  }catch(e){
+    console.error(e);
+    if(msg)msg.innerHTML='<div class="warn">No se pudo generar el PDF. Intente de nuevo.</div>';
+  }
+}
+
+function celdaTexto(texto,opts={}){
+  return new docx.Paragraph({
+    alignment:opts.align||docx.AlignmentType.LEFT,
+    spacing:{after:0},
+    children:[new docx.TextRun({text:String(texto),bold:!!opts.bold,italics:!!opts.italic,size:opts.size||19,color:opts.color||'1A1A1A'})]
+  });
+}
+function celda(texto,opts={}){
+  return new docx.TableCell({
+    width:opts.width?{size:opts.width,type:docx.WidthType.PERCENTAGE}:undefined,
+    shading:opts.shade?{type:docx.ShadingType.CLEAR,fill:opts.shade,color:'auto'}:undefined,
+    verticalAlign:docx.VerticalAlign.CENTER,
+    margins:{top:70,bottom:70,left:110,right:110},
+    children:[celdaTexto(texto,opts)]
+  });
+}
+function filaEncabezado(labels,widths){
+  return new docx.TableRow({tableHeader:true,children:labels.map((t,i)=>celda(t,{width:widths?widths[i]:undefined,shade:'1A1A1A',color:'FFFFFF',bold:true,size:16,align:i>0?docx.AlignmentType.RIGHT:docx.AlignmentType.LEFT}))});
+}
+function filaDatos(cols,opts={}){
+  return new docx.TableRow({children:cols.map((t,i)=>celda(t,{width:opts.widths?opts.widths[i]:undefined,align:i>0?docx.AlignmentType.RIGHT:docx.AlignmentType.LEFT,bold:opts.bold,shade:opts.shade,size:opts.size||19}))});
+}
+function tablaLiq(rows){
+  const b={style:docx.BorderStyle.SINGLE,size:2,color:'CCCCCC'},bi={style:docx.BorderStyle.SINGLE,size:2,color:'E6E6E6'};
+  return new docx.Table({width:{size:100,type:docx.WidthType.PERCENTAGE},borders:{top:b,bottom:b,left:b,right:b,insideHorizontal:bi,insideVertical:bi},rows});
+}
+
+async function construirDocx(){
+  const fh=parseFecha(val('c-fecha-hecho')),fl=parseFecha(val('c-fecha-liq'));
+  const de=window._DE,mu=window._MU,le=window._LE,inm=window._IN;
+  const cuerpo=[];
+
+  cuerpo.push(new docx.Paragraph({alignment:docx.AlignmentType.CENTER,spacing:{after:60},children:[new docx.TextRun({text:'JURISDICCIÓN DE LO CONTENCIOSO ADMINISTRATIVO',size:15,color:'7A2E2E',bold:true})]}));
+  cuerpo.push(new docx.Paragraph({alignment:docx.AlignmentType.CENTER,spacing:{after:40},children:[new docx.TextRun({text:'Acta de liquidación de perjuicios',bold:true,size:36,color:'1A1A1A'})]}));
+  cuerpo.push(new docx.Paragraph({alignment:docx.AlignmentType.CENTER,spacing:{after:260},children:[new docx.TextRun({text:val('c-despacho')||'—',italics:true,size:20,color:'555555'})]}));
+
+  const meta=[['Radicado',val('c-radicado')||'—'],['Fecha de liquidación',fmtFecha(fl)],['Demandante(s)',val('c-demandante')||'—'],['Demandado(a)',val('c-demandado')||'—'],['Fecha del hecho dañoso',fmtFecha(fh)],['Elaborada por',val('c-autor')||'—']];
+  meta.forEach(([k,v])=>{
+    cuerpo.push(new docx.Paragraph({spacing:{after:60},children:[new docx.TextRun({text:k.toUpperCase()+':  ',bold:true,size:18,color:'7A2E2E'}),new docx.TextRun({text:v,size:20,color:'1A1A1A'})]}));
+  });
+  cuerpo.push(new docx.Paragraph({spacing:{before:120,after:280},border:{bottom:{style:docx.BorderStyle.SINGLE,size:6,color:'CCCCCC'}},children:[new docx.TextRun({text:`${DATOS_META.actualizado_texto} · último índice aplicado: ${ultimoIPCCertificado()||'—'} · ${DATOS_META.fuente_ipc||'IPC DANE serie de empalme'}`,italics:true,size:15,color:'777777'})]}));
+
+  let granTotal=0,sec=0;
+  const tituloSeccion=t=>cuerpo.push(new docx.Paragraph({spacing:{before:200,after:120},children:[new docx.TextRun({text:t,bold:true,size:22,color:'7A2E2E'})]}));
+  const nota=t=>cuerpo.push(new docx.Paragraph({spacing:{before:100,after:100},children:[new docx.TextRun({text:t,italics:true,size:15,color:'777777'})]}));
+
+  if(de){
+    sec++;granTotal+=de.total;
+    tituloSeccion(`${sec}. Daño emergente`);
+    const filas=[filaEncabezado(['Concepto','IPC inicial','Valor histórico','Valor actualizado'],[40,20,20,20])];
+    de.filas.filter(x=>!x.err).forEach(x=>filas.push(filaDatos([`${x.c} (${fmtFecha(x.f)})`,`${x.ipcI.etiqueta}: ${fmt(x.ipcI.valor)}`,fmtCOP(x.v),fmtCOP(x.ra)],{widths:[40,20,20,20]})));
+    filas.push(filaDatos(['Subtotal daño emergente','','',fmtCOP(de.total)],{widths:[40,20,20,20],bold:true,shade:'F1E3DD'}));
+    cuerpo.push(tablaLiq(filas));
+    nota(`Ra = Rh × (IPC final / IPC inicial), IPC final de ${de.ipcF.etiqueta} = ${fmt(de.ipcF.valor)}, serie de empalme DANE base dic. 2018 = 100.`);
+  }
+
+  if(mu){
+    sec++;granTotal+=mu.total;
+    tituloSeccion(`${sec}. Lucro cesante — muerte ${mu.modo==='acrec'?'(con acrecimiento, CE-SUJ Exp. 19146)':'(sin acrecimiento)'}`);
+    nota(`Renta actualizada depurada: ${fmtCOP(mu.R.dep)} · período consolidado n = ${fmt(mu.n)} meses · período futuro = ${fmt(mu.Tfut)} meses · i = 0,004867 mensual.`);
+    const filas=[filaEncabezado(['Beneficiario','Total asignado'],[70,30])];
+    if(mu.haycony)filas.push(filaDatos(['Cónyuge / compañero(a)',fmtCOP(mu.totCony)],{widths:[70,30]}));
+    mu.benef.forEach(x=>filas.push(filaDatos([x.et,fmtCOP(mu.totHijos[x.ix]||0)],{widths:[70,30]})));
+    if(mu.totReserva>0.005)filas.push(filaDatos(['Reserva del causante (no distribuida)',fmtCOP(mu.totReserva)],{widths:[70,30]}));
+    filas.push(filaDatos(['Subtotal lucro cesante',fmtCOP(mu.total)],{widths:[70,30],bold:true,shade:'F1E3DD'}));
+    cuerpo.push(tablaLiq(filas));
+  }
+
+  if(le){
+    sec++;granTotal+=le.total;
+    tituloSeccion(`${sec}. Lucro cesante — lesiones (PCL ${fmt(le.pcl)} %)`);
+    const filas=[filaEncabezado(['Componente','Valor'],[70,30])];
+    filas.push(filaDatos([`Consolidado (n = ${fmt(le.n)} meses${le.itt>0?`, incluye ${fmt(le.itt)} meses de ITT al 100 %`:''})`,fmtCOP(le.LCC)],{widths:[70,30]}));
+    filas.push(filaDatos([`Futuro (hasta vida probable, ${fmt(le.nFut)} meses)`,fmtCOP(le.LCF)],{widths:[70,30]}));
+    filas.push(filaDatos(['Subtotal lucro cesante',fmtCOP(le.total)],{widths:[70,30],bold:true,shade:'F1E3DD'}));
+    cuerpo.push(tablaLiq(filas));
+  }
+
+  if(inm){
+    sec++;granTotal+=inm.total;
+    tituloSeccion(`${sec}. Perjuicios inmateriales (SMLMV = ${fmtCOP(inm.sm)})`);
+    const filas=[filaEncabezado(['Concepto / beneficiario','SMLMV','Valor'],[60,20,20])];
+    inm.detalleMoral.forEach(x=>filas.push(filaDatos([`Daño moral — ${x.nom} (${NIVELES[x.lv].split('—')[0].trim()})`,fmt(x.smlmv,1),fmtCOP(x.v)],{widths:[60,20,20]})));
+    if(inm.salud)filas.push(filaDatos([`Daño a la salud — ${inm.saludNom||'víctima directa'}`,fmt(inm.saludSM,1),fmtCOP(inm.salud)],{widths:[60,20,20]}));
+    inm.detalleBienes.forEach(x=>filas.push(filaDatos([`Bienes convencional/constitucionalmente amparados — ${x.nom}`,fmt(x.s,1),fmtCOP(x.v)],{widths:[60,20,20]})));
+    filas.push(filaDatos(['Subtotal perjuicios inmateriales','',fmtCOP(inm.total)],{widths:[60,20,20],bold:true,shade:'F1E3DD'}));
+    cuerpo.push(tablaLiq(filas));
+  }
+
+  cuerpo.push(new docx.Table({
+    width:{size:100,type:docx.WidthType.PERCENTAGE},
+    margins:{top:200,bottom:200,left:200,right:200},
+    rows:[new docx.TableRow({children:[new docx.TableCell({
+      shading:{type:docx.ShadingType.CLEAR,fill:'1A1A1A',color:'auto'},
+      margins:{top:220,bottom:220,left:220,right:220},
+      children:[
+        new docx.Paragraph({alignment:docx.AlignmentType.CENTER,spacing:{after:80},children:[new docx.TextRun({text:'TOTAL GENERAL DE LA LIQUIDACIÓN',bold:true,size:16,color:'D8B978'})]}),
+        new docx.Paragraph({alignment:docx.AlignmentType.CENTER,spacing:{after:80},children:[new docx.TextRun({text:fmtCOP(granTotal),bold:true,size:44,color:'FFFFFF'})]}),
+        new docx.Paragraph({alignment:docx.AlignmentType.CENTER,children:[new docx.TextRun({text:'Suma de los componentes liquidados en la presente acta',italics:true,size:15,color:'CCCCCC'})]})
+      ]
+    })]})]
+  }));
+
+  cuerpo.push(new docx.Paragraph({spacing:{before:320,after:400},children:[
+    new docx.TextRun({text:'Fundamentos: ',bold:true,size:15,color:'7A2E2E'}),
+    new docx.TextRun({text:'Indexación con IPC — serie de empalme DANE (base dic. 2018 = 100), regla del mes vencido. Vida probable — Resolución 1555 de 2010, Superintendencia Financiera (tabla RV08, e°(x)). Lucro cesante — fórmulas financieras con i = 0,004867 mensual (6 % anual), criterio del Consejo de Estado, Sección Tercera. Acrecimiento — sentencia de unificación Exp. 19146 (Rad. 15001-23-31-000-2000-03838-01). Perjuicios inmateriales — sentencias de unificación del 28 de agosto de 2014, Sección Tercera (Exps. 26251, 31170, 32988, 28804): daño moral, daño a la salud y afectación relevante a bienes convencional y constitucionalmente amparados. Herramienta académica: los valores deben verificarse contra el expediente y la prueba obrante.',size:15,color:'555555'})
+  ]}));
+
+  const lineaFirma=etiqueta=>cuerpo.push(new docx.Paragraph({spacing:{before:500,after:40},border:{top:{style:docx.BorderStyle.SINGLE,size:6,color:'999999'}},children:[new docx.TextRun({text:etiqueta,size:15,color:'555555'})]}));
+  lineaFirma('Liquidador');
+  lineaFirma('Revisó');
+
+  return new docx.Document({sections:[{properties:{page:{margin:{top:900,bottom:900,left:900,right:900}}},children:cuerpo}]});
+}
+
+async function descargarDocx(){
+  renderActa();
+  if(actaVacia()){alert('Liquide al menos un módulo (II a V) y pulse «Actualizar acta» antes de descargar.');return;}
+  const msg=$('acta-export-msg');
+  if(msg)msg.innerHTML='<div class="notice">Generando documento Word…</div>';
+  try{
+    const doc=await construirDocx();
+    const blob=await docx.Packer.toBlob(doc);
+    descargarBlob(blob,nombreArchivo('docx'));
+    if(msg)msg.innerHTML='';
+  }catch(e){
+    console.error(e);
+    if(msg)msg.innerHTML='<div class="warn">No se pudo generar el archivo Word. Intente de nuevo.</div>';
+  }
 }
 
 /* ---------- init ---------- */
